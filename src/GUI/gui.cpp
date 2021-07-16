@@ -57,7 +57,7 @@ void GUI::showMenuBar() {
                     fmt::print ("Opened file {}\n", path.string());
                 }
             }
-            
+
             if (ImGui::MenuItem ("Save state", nullptr))
                 fmt::print ("Save state");
 
@@ -88,7 +88,7 @@ void GUI::showDisplay() {
         const auto scale_y = size.y / MyEmulator::height;
         const auto scale = scale_x < scale_y ? scale_x : scale_y;
 
-        display.update (emulator.framebuffer.data()); // Present the buffer that's not being currently written to
+        display.update (emulator.framebuffer.data());
         sf::Sprite sprite (display);
         sprite.setScale (scale, scale);
         
