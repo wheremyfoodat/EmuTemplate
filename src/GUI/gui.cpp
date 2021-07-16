@@ -42,19 +42,29 @@ void GUI::showMenuBar() {
     static const char* romTypes[] = { "*.bin", "*.rom" }; // Some generic filetypes for ROMs, configure as you want
     
     if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::MenuItem ("Open ROM")) { // Show file selection dialog if open ROM button is pressed
-            auto file = tinyfd_openFileDialog(
-                "Choose a ROM", // File explorer window title
-                "",             // Default directory
-                2,              // Amount of file types
-                romTypes,       // Array of file types
-                "ROMs",         // File type description in file explorer window
-                0);
+        if (ImGui::BeginMenu ("File")) { // Show file selection dialog if open ROM button is pressed
+            if (ImGui::MenuItem ("Open ROM", nullptr)) {
+                auto file = tinyfd_openFileDialog(
+                    "Choose a ROM", // File explorer window title
+                    "",             // Default directory
+                    2,              // Amount of file types
+                    romTypes,       // Array of file types
+                    "ROMs",         // File type description in file explorer window
+                    0);
 
-            if (file != nullptr) {  // Check if file dialog was canceled
-                const auto path = std::filesystem::path (file);
-                fmt::print ("Opened file {}\n", path.string());
+                if (file != nullptr) {  // Check if file dialog was canceled
+                    const auto path = std::filesystem::path (file);
+                    fmt::print ("Opened file {}\n", path.string());
+                }
             }
+            
+            if (ImGui::MenuItem ("Save state", nullptr))
+                fmt::print ("Save state");
+
+            if (ImGui::MenuItem ("Load state", nullptr))
+                fmt::print ("Load state");
+
+            ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu ("Emulation")) {
