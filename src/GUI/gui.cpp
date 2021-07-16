@@ -7,7 +7,7 @@
 GUI::GUI (MyEmulator& emulator) : window(sf::VideoMode(800, 600), "SFML window"), emulator(emulator) {
     window.setFramerateLimit(60); // cap FPS to 60
     ImGui::SFML::Init(window);    // Init Imgui-SFML
-    display.create (720, 480);
+    display.create (MyEmulator::width, MyEmulator::height);
 
     auto& io = ImGui::GetIO();  // Set some ImGui options
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable navigation with keyboard
@@ -15,13 +15,6 @@ GUI::GUI (MyEmulator& emulator) : window(sf::VideoMode(800, 600), "SFML window")
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Configure viewport feature
     io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
     io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
-
-    io.Fonts -> Clear();  // Use Deja Vu Sans Mono as the font if found
-    auto fontPath = std::filesystem::current_path() / "DejaVuSansMono.ttf";
-    auto font = io.Fonts -> AddFontFromFileTTF (fontPath.string().c_str(), 18.f);
-    if (!font) // Fall back to default font if not found
-        io.Fonts -> AddFontDefault();
-    ImGui::SFML::UpdateFontTexture(); // Updates font texture
 }
 
 void GUI::update() {
@@ -32,13 +25,17 @@ void GUI::update() {
         if (event.type == sf::Event::Closed)
             window.close();
     }
+
+    if (emulator.isRunning)
+        emulator.runFrame();
+
     ImGui::SFML::Update(window, deltaClock.restart()); // Update imgui-sfml
 
     showMenuBar(); // Render GUI stuff
+    showDisplay();
+    ImGui::ShowDemoWindow();
 
-    window.clear(); // Render
-    ImGui::SFML::Render(window);
-    window.display();
+    drawGUI();
 }
 
 void GUI::showMenuBar() {
@@ -60,6 +57,38 @@ void GUI::showMenuBar() {
             }
         }
 
+        if (ImGui::BeginMenu ("Emulation")) {
+            if (ImGui::MenuItem ("Step", nullptr))
+                emulator.step();
+            ImGui::MenuItem ("Run", nullptr, &emulator.isRunning);
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMainMenuBar();
     }
+}
+
+// TODO: Optimize this
+// This is fairly slow, so for best measure if you don't want presentation to bottleneck emulation too much
+// You should have the emulator on a separate thread from the GUI
+void GUI::showDisplay() {
+    if (ImGui::Begin ("Display")) {
+        const auto size = ImGui::GetWindowSize();
+        const auto scale_x = size.x / MyEmulator::width;
+        const auto scale_y = size.y / MyEmulator::height;
+        const auto scale = scale_x < scale_y ? scale_x : scale_y;
+
+        display.update (emulator.framebuffer.data()); // Present the buffer that's not being currently written to
+        sf::Sprite sprite (display);
+        sprite.setScale (scale, scale);
+        
+        ImGui::Image (sprite);
+        ImGui::End();
+    }
+}
+
+void GUI::drawGUI() {
+    window.clear (sf::Color(115, 140, 153, 255)); // Clear window with turquoise
+    ImGui::SFML::Render(window); // Render ImGui contents
+    window.display(); // Display ImGui contents
 }

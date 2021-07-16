@@ -18,4 +18,6 @@ public:
 
 private:
     void showMenuBar();
+    void showDisplay();
+    void drawGUI();
 };
