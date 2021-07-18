@@ -83,7 +83,7 @@ void GUI::showMenuBar() {
 // You should have the emulator on a separate thread from the GUI
 void GUI::showDisplay() {
     if (ImGui::Begin ("Display")) {
-        const auto size = ImGui::GetWindowSize();
+        const auto size = ImGui::GetContentRegionAvail();
         const auto scale_x = size.x / MyEmulator::width;
         const auto scale_y = size.y / MyEmulator::height;
         const auto scale = scale_x < scale_y ? scale_x : scale_y;
