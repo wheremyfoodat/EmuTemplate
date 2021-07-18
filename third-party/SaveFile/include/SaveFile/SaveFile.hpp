@@ -70,7 +70,7 @@ public:
     SaveFile() {} // Empty file. exists() will return false
 
     uint8_t at (size_t index) {
-        if (index > beeg) panic ("Out of bounds save file access\n");
+        if (index >= beeg) panic ("Out of bounds save file access\n");
         return pointer[index];
     }
 
