@@ -11,3 +11,6 @@
 	path = third-party/imgui
 	url = https://github.com/ocornut/imgui
     branch = docking
+[submodule "third-party/xbyak"]
+	path = third-party/xbyak
+	url = https://github.com/herumi/xbyak

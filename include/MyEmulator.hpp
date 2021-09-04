@@ -1,21 +1,33 @@
 #pragma once
 #include <array>
+#include <filesystem>
 #include "utils.hpp"
+#include "recompiler.hpp"
 
-// Replace this with your own emulator class
 class MyEmulator {
-public:
-    static const int width = 160;
-    static const int height = 144;
+    Chipper chip;
 
-    void step();
-    void runFrame();
+public:
+    static constexpr int width = 64;
+    static constexpr int height = 32;
+    static constexpr int cyclesPerFrame = 60;
 
     bool isRunning = false;
-    int framesPassed = 0;
-    std::array <u8, width * height * 4> framebuffer; // An 160x144 RGBA framebuffer
-
-    MyEmulator() {
-        framebuffer.fill (0xFF);
+    bool loadedROM = false;
+    
+    void loadROM (const std::filesystem::path& path) {
+        chip.reset();
+        chip.loadROM (path);
+        loadedROM = true;
     }
+
+    void step() {
+        chip.execute();
+    }
+
+    uint8_t* getFramebuffer() {
+        return chip.getFramebuffer();
+    }
+
+    void runFrame();
 };

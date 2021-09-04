@@ -35,12 +35,14 @@ include_directories(third-party/json)
 include_directories(third-party/sha1)
 include_directories(third-party/mio/single_include)
 include_directories(third-party/SaveFile/include)
+include_directories(third-party/xbyak/xbyak)
 
 add_subdirectory(third-party/imgui-sfml)
 
 add_executable(MyEmulator
     src/main.cpp
     src/MyEmulator.cpp
+    src/recompiler.cpp
     src/GUI/gui.cpp
 
     third-party/imgui/imgui_draw.cpp

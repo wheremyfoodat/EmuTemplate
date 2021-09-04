@@ -10,11 +10,21 @@ GUI::GUI (MyEmulator& emulator) : window(sf::VideoMode(800, 600), "SFML window")
     display.create (MyEmulator::width, MyEmulator::height);
 
     auto& io = ImGui::GetIO();  // Set some ImGui options
+
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable navigation with keyboard
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Configure viewport feature
     io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
     io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
+
+    auto& style = ImGui::GetStyle(); // Set some styling options
+
+    style.WindowRounding = 7.0f;
+    style.ChildRounding = 7.0f;
+    style.FrameRounding = 7.0f;
+    style.GrabRounding = 7.0f;
+    style.PopupRounding = 7.0f;
+    style.ScrollbarRounding = 7.0f;
 }
 
 void GUI::update() {
@@ -26,20 +36,19 @@ void GUI::update() {
             window.close();
     }
 
-    if (emulator.isRunning)
+    if (emulator.isRunning && emulator.loadedROM)
         emulator.runFrame();
 
     ImGui::SFML::Update(window, deltaClock.restart()); // Update imgui-sfml
 
     showMenuBar(); // Render GUI stuff
     showDisplay();
-    ImGui::ShowDemoWindow();
 
     drawGUI();
 }
 
 void GUI::showMenuBar() {
-    static const char* romTypes[] = { "*.bin", "*.rom" }; // Some generic filetypes for ROMs, configure as you want
+    static const char* romTypes[] = { "*.bin", "*.rom", "*.ch8" }; // Some generic filetypes for ROMs, configure as you want
     
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu ("File")) { // Show file selection dialog if open ROM button is pressed
@@ -47,14 +56,14 @@ void GUI::showMenuBar() {
                 auto file = tinyfd_openFileDialog(
                     "Choose a ROM", // File explorer window title
                     "",             // Default directory
-                    2,              // Amount of file types
+                    3,              // Amount of file types
                     romTypes,       // Array of file types
                     "ROMs",         // File type description in file explorer window
                     0);
 
                 if (file != nullptr) {  // Check if file dialog was canceled
                     const auto path = std::filesystem::path (file);
-                    fmt::print ("Opened file {}\n", path.string());
+                    emulator.loadROM (path);
                 }
             }
 
@@ -88,7 +97,7 @@ void GUI::showDisplay() {
         const auto scale_y = size.y / MyEmulator::height;
         const auto scale = scale_x < scale_y ? scale_x : scale_y;
 
-        display.update (emulator.framebuffer.data());
+        display.update (emulator.getFramebuffer());
         sf::Sprite sprite (display);
         sprite.setScale (scale, scale);
         
